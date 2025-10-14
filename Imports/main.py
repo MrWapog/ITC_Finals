@@ -71,7 +71,7 @@ class Player(Sprite):
         self.thrust += self.acceleration
 
     def decelerate(self):
-        self.thrust = 0.0
+        self.thrust = 0.0a
 
     def render(self, pen):
         pen.shapesize(0.5, 1.0, None)
