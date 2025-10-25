@@ -18,7 +18,7 @@ pen.penup()
 pen.hideturtle()
 
 class Game():
-    def __init__(self, width, height):
+    def __init__(self,width, height):
         self.width = width
         self.height = height
 
@@ -27,10 +27,10 @@ class Game():
         pen.width(3)
         pen.penup()
 
-        left = -self.width / 2.0
-        right = self.width / 2.0
-        top = self.height / 2.0
-        bottom = -self.height / 2.0
+        left = -self.width/2.0
+        right = self.width/2.0
+        top = self.height/2.0
+        bottom = -self.height/2.0
 
         pen.goto(left, top)
         pen.pendown()
@@ -40,8 +40,8 @@ class Game():
         pen.goto(left, top)
         pen.penup()
 
-
 class Sprite:
+    # This is the Constructor
     def __init__(self, x, y, shape, color):
         self.x = x
         self.y = y
@@ -52,15 +52,15 @@ class Sprite:
         self.heading = 0
         self.da = 0
         self.thrust = 0.0
-        self.acceleration = 0.01
+        self.acceleration = 0.2
         self.health = 100
         self.max_health = 100
 
     def update(self):
+
         self.heading += self.da
         self.heading %= 360
 
-        # Apply thrust
         self.dx += math.cos(math.radians(self.heading)) * self.thrust
         self.dy += math.sin(math.radians(self.heading)) * self.thrust
 
@@ -70,18 +70,10 @@ class Sprite:
         self.border_check()
 
     def border_check(self):
-        if self.x > game.width / 2.0 - 10:
-            self.x = game.width / 2.0 -10
+        if self.x > game.width/2.0:
+            self.x = game.width/2.0
             self.dx *= -1
-        elif self.x < -game.width / 2.0 + 10:
-            self.x = -game.width / 2.0 + 10
-            self.dx *= -1
-        if self.y > game.height / 2.0 - 10:
-            self.y = game.height / 2.0 - 10
-            self.dy *= -1
-        elif self.y < -game.height / 2.0 + 10:
-            self.y = -game.height / 2.0 + 10
-            self.dy *= -1
+
 
     def render(self, pen):
         pen.goto(self.x, self.y)
@@ -89,49 +81,50 @@ class Sprite:
         pen.shape(self.shape)
         pen.color(self.color)
         pen.stamp()
+
         self.render_health_meter(pen)
 
-    def render_health_meter(self, pen):
+    def render_health_meter(self,pen):
+        # Health Meter
         pen.goto(self.x - 10, self.y + 20)
         pen.width(3)
         pen.down()
         pen.setheading(0)
 
-        if self.health / self.max_health < 0.3:
+        if self.health/self.max_health < 0.3:
             pen.color("red")
-        elif self.health / self.max_health < 0.7:
+        elif self.health/self.max_health < 0.7:
             pen.color("yellow")
         else:
             pen.color("green")
 
-        pen.fd(20 * (self.health / self.max_health))
+        pen.fd(20 * (self.health/self.max_health))
 
         if self.health != self.max_health:
-            pen.color("grey")
-            pen.fd(20.0 * ((self.max_health - self.health) / self.max_health))
+           pen.color("grey")
+           pen.fd(20.0 * ((self.max_health-self.health)/self.max_health))
 
         pen.penup()
 
-
 class Player(Sprite):
     def __init__(self, x, y, shape, color):
-        Sprite.__init__(self, x, y, shape, color)
+        Sprite.__init__(self, 0, 0, shape, color)
         self.lives = 3
         self.score = 0
         self.heading = 90
         self.da = 0
 
     def rotate_left(self):
-        self.da = 3
+        self.da = 5
 
     def rotate_right(self):
-        self.da = -3
+        self.da = -5
 
     def stop_rotation(self):
         self.da = 0
 
     def accelerate(self):
-        self.thrust = self.acceleration
+        self.thrust += self.acceleration
 
     def decelerate(self):
         self.thrust = 0.0
@@ -143,11 +136,12 @@ class Player(Sprite):
         pen.shape(self.shape)
         pen.color(self.color)
         pen.stamp()
+
         pen.shapesize(1.0, 1.0, None)
+
         self.render_health_meter(pen)
 
-
-# Game object
+#Game object
 game = Game(600, 300)
 
 # Create player sprite
@@ -169,21 +163,28 @@ sprites = [player, enemy, powerup]
 wn.listen()
 wn.onkeypress(player.rotate_left, "Left")
 wn.onkeypress(player.rotate_right, "Right")
+
 wn.onkeyrelease(player.stop_rotation, "Left")
 wn.onkeyrelease(player.stop_rotation, "Right")
+
 wn.onkeypress(player.accelerate, "Up")
 wn.onkeyrelease(player.decelerate, "Up")
 
 # MAIN LOOP
 while True:
+    #clear screen
     pen.clear()
 
+    # gameStuff
+    # Update sprites
     for sprite in sprites:
         sprite.update()
 
+    # Render sprites
     for sprite in sprites:
         sprite.render(pen)
 
     game.render_border(pen)
 
+    # Update screen
     wn.update()
