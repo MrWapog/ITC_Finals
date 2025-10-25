@@ -305,3 +305,4 @@ while True:
     game.render_border(pen)
 
     wn.update()
+a
