@@ -99,7 +99,7 @@ class Game:
         pen.color("white")
         # Some variables referenced here must exist; using globals from script
         character_pen.scale = 1.0
-        character_pen.draw_string(pen, "SPACE ARENA", 400, 270)
+        character_pen.draw_string(pen, "AIRFARTS", 400, 270)
         character_pen.draw_string(pen, "SCORE {}".format(score), 400, 240)
         character_pen.draw_string(pen, "ENEMIES {}".format(active_enemies), 400, 210)
         character_pen.draw_string(pen, "LIVES {}".format(player.lives), 400, 180)
@@ -739,7 +739,7 @@ while True:
                 if sprite.state == "active" and sprite.is_collision(player):
                     sprite.reset()
                     player.health -= 10
-a
+
         # Render sprites
         for sprite in sprites:
             sprite.render(pen, camera.x + 100, camera.y)
