@@ -739,7 +739,7 @@ while True:
                 if sprite.state == "active" and sprite.is_collision(player):
                     sprite.reset()
                     player.health -= 10
-
+a
         # Render sprites
         for sprite in sprites:
             sprite.render(pen, camera.x + 100, camera.y)
