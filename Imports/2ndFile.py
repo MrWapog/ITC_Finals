@@ -1,13 +1,22 @@
+# Space Arena!
+# The Ultimate Python Turtle Graphics Game Tutorial
+# Python 3.x Compatible
+# Windows, MacOSX, and Linux Compatible
+# by @TokyoEdtech
+# Blog: https://www.christianthompson.com
+# YouTube Channel: https://www.youtube.com/channel/UC2vm-0XX5RkWCXWwtBZGOXg/
+# Part 19: Enemy Missiles
+
+import turtle
 import math
 import random
-import turtle
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 wn = turtle.Screen()
-wn.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
-wn.title("AIRFARTS BY @MrWapog")
+wn.setup(SCREEN_WIDTH + 220, SCREEN_HEIGHT + 20)
+wn.title("Space Arena! by @TokyoEdTech")
 wn.bgcolor("black")
 wn.tracer(0)
 
@@ -19,7 +28,7 @@ pen.penup()
 pen.hideturtle()
 
 
-class Game:
+class Game():
     def __init__(self, width, height):
         self.width = width
         self.height = height
@@ -29,38 +38,36 @@ class Game:
     def start_level(self):
         sprites.clear()
 
-        # Add enemy missiles (so they exist in sprites if active later)
+        # Add enemy missiles
         for enemy_missile in enemy_missiles:
             sprites.append(enemy_missile)
 
         # Add player
         sprites.append(player)
 
-        # Add missile placeholders
+        # Add missile
         for missile in missiles:
             sprites.append(missile)
 
         # Add enemies
         for _ in range(self.level):
-            x = random.randint(int(-self.width / 2), int(self.width / 2))
-            y = random.randint(int(-self.height / 2), int(self.height / 2))
-            dx = random.uniform(-2, 2)
-            dy = random.uniform(-2, 2)
-            enemy = Enemy(x, y, "square", "red")
-            enemy.dx = dx
-            enemy.dy = dy
-            sprites.append(enemy)
+            x = random.randint(-self.width / 2, self.width / 2)
+            y = random.randint(-self.height / 2, self.height / 2)
+            dx = random.randint(-2, 2)
+            dy = random.randint(-2, -2)
+            sprites.append(Enemy(x, y, "square", "red"))
+            sprites[-1].dx = dx
+            sprites[-1].dy = dy
 
         # Add powerups
         for _ in range(self.level):
-            x = random.randint(int(-self.width / 2), int(self.width / 2))
-            y = random.randint(int(-self.height / 2), int(self.height / 2))
-            dx = random.uniform(-2, 2)
-            dy = random.uniform(-2, 2)
-            powerup = Powerup(x, y, "circle", "blue")
-            powerup.dx = dx
-            powerup.dy = dy
-            sprites.append(powerup)
+            x = random.randint(-self.width / 2, self.width / 2)
+            y = random.randint(-self.height / 2, self.height / 2)
+            dx = random.randint(-2, 2)
+            dy = random.randint(-2, -2)
+            sprites.append(Powerup(x, y, "circle", "blue"))
+            sprites[-1].dx = dx
+            sprites[-1].dy = dy
 
     def render_border(self, pen, x_offset, y_offset):
         pen.color("white")
@@ -97,7 +104,6 @@ class Game:
 
         pen.penup()
         pen.color("white")
-        # Some variables referenced here must exist; using globals from script
         character_pen.scale = 1.0
         character_pen.draw_string(pen, "SPACE ARENA", 400, 270)
         character_pen.draw_string(pen, "SCORE {}".format(score), 400, 240)
@@ -155,13 +161,13 @@ class CharacterPen():
 
         self.characters["-"] = ((-3, 0), (3, 0))
 
-    def draw_string(self, pen, s, x, y):
+    def draw_string(self, pen, str, x, y):
         pen.width(2)
         pen.color(self.color)
 
         # Center text
-        x -= 15 * self.scale * ((len(s) - 1) / 2)
-        for character in s:
+        x -= 15 * self.scale * ((len(str) - 1) / 2)
+        for character in str:
             self.draw_character(pen, character, x, y)
             x += 15 * self.scale
 
@@ -187,10 +193,10 @@ class CharacterPen():
 
 # Splash Screen
 character_pen = CharacterPen("red", 3.0)
-character_pen.draw_string(pen, "AIRFARTS", 0, 160)
+character_pen.draw_string(pen, "SPACE ARENA", 0, 160)
 
 character_pen.scale = 1.0
-character_pen.draw_string(pen, "BY MrWapog", 0, 100)
+character_pen.draw_string(pen, "BY TOKYOEDTECH", 0, 100)
 
 pen.color("white")
 pen.shape("triangle")
@@ -229,7 +235,8 @@ character_pen.draw_string(pen, "PRESS S TO START", 0, -240)
 wn.tracer(0)
 
 
-class Sprite:
+class Sprite():
+    # Constructor
     def __init__(self, x, y, shape, color):
         self.x = x
         self.y = y
@@ -240,25 +247,34 @@ class Sprite:
         self.heading = 0
         self.da = 0
         self.thrust = 0.0
-        self.acceleration = 0.01
+        self.acceleration = 0.2
         self.health = 100
         self.max_health = 100
         self.width = 20
         self.height = 20
         self.state = "active"
+        self.radar = 200
+        self.max_dx = 5
+        self.max_dy = 5
 
     def is_collision(self, other):
-        return (
-            self.x < other.x + other.width
-            and self.x + self.width > other.x
-            and self.y < other.y + other.height
-            and self.y + self.height > other.y
-        )
+        if self.x < other.x + other.width and \
+                self.x + self.width > other.x and \
+                self.y < other.y + other.height and \
+                self.y + self.height > other.y:
+            return True
+        else:
+            return False
 
     def bounce(self, other):
-        temp_dx, temp_dy = self.dx, self.dy
-        self.dx, self.dy = other.dx, other.dy
-        other.dx, other.dy = temp_dx, temp_dy
+        temp_dx = self.dx
+        temp_dy = self.dy
+
+        self.dx = other.dx
+        self.dy = other.dy
+
+        other.dx = temp_dx
+        other.dy = temp_dy
 
     def update(self):
         self.heading += self.da
@@ -300,71 +316,78 @@ class Sprite:
             self.render_health_meter(pen, x_offset, y_offset)
 
     def render_health_meter(self, pen, x_offset, y_offset):
+        # Draw health meter
         pen.goto(self.x - x_offset - 10, self.y - y_offset + 20)
         pen.width(3)
         pen.pendown()
         pen.setheading(0)
 
-        ratio = self.health / self.max_health
-        if ratio < 0.3:
+        if self.health / self.max_health < 0.3:
             pen.color("red")
-        elif ratio < 0.7:
+        elif self.health / self.max_health < 0.7:
             pen.color("yellow")
         else:
             pen.color("green")
 
-        pen.fd(20.0 * ratio)
+        pen.fd(20.0 * (self.health / self.max_health))
+
         if self.health != self.max_health:
             pen.color("grey")
             pen.fd(20.0 * ((self.max_health - self.health) / self.max_health))
+
         pen.penup()
 
 
 class Player(Sprite):
     def __init__(self, x, y, shape, color):
-        super().__init__(x, y, shape, color)
+        Sprite.__init__(self, 0, 0, shape, color)
         self.lives = 3
         self.score = 0
         self.heading = 90
         self.da = 0
-        self.radar = 250  # detection radius
 
     def rotate_left(self):
-        self.da = 2
+        self.da = 5
 
     def rotate_right(self):
-        self.da = -2
+        self.da = -5
 
     def stop_rotation(self):
         self.da = 0
 
     def accelerate(self):
-        self.thrust = self.acceleration
+        self.thrust += self.acceleration
 
     def decelerate(self):
         self.thrust = 0.0
 
     def fire(self):
-        # collect ready missiles
-        ready = [m for m in missiles if m.state == "ready"]
-        num_of_missiles = len(ready)
+        num_of_missiles = 0
+        for missile in missiles:
+            if missile.state == "ready":
+                num_of_missiles += 1
 
-        # choose directions based on how many ready
-        if num_of_missiles == 0:
-            return
+        print(num_of_missiles)
 
+        # 1 missile ready
         if num_of_missiles == 1:
-            directions = [0]
-        elif num_of_missiles == 2:
-            directions = [-5, 5]
-        else:
-            # cap to 3 directions
-            directions = [0, -5, 5]
+            for missile in missiles:
+                if missile.state == "ready":
+                    missile.fire(self.x, self.y, self.heading + directions.pop(), self.dx, self.dy)
 
-        # fire missiles (match each ready missile with a direction)
-        for i, m in enumerate(ready[: len(directions)]):
-            dir_angle = directions[i]
-            m.fire(self.x, self.y, self.heading + dir_angle, self.dx, self.dy)
+        # 2 missiles ready
+        if num_of_missiles == 2:
+            directions = [-5, 5]
+            for missile in missiles:
+                if missile.state == "ready":
+                    missile.fire(self.x, self.y, self.heading + directions.pop(), self.dx, self.dy)
+
+        # 3 missiles ready
+        if num_of_missiles == 3:
+            directions = [0, -5, 5]
+            for missile in missiles:
+                if missile.state == "ready":
+                    missile.fire(self.x, self.y, self.heading + directions.pop(), self.dx, self.dy)
 
     def update(self):
         if self.state == "active":
@@ -384,10 +407,12 @@ class Player(Sprite):
                 self.reset()
 
     def reset(self):
-        self.x, self.y = 0, 0
+        self.x = 0
+        self.y = 0
         self.health = self.max_health
         self.heading = 90
-        self.dx = self.dy = 0
+        self.dx = 0
+        self.dy = 0
         self.lives -= 1
 
     def render(self, pen, x_offset, y_offset):
@@ -397,6 +422,7 @@ class Player(Sprite):
         pen.shape(self.shape)
         pen.color(self.color)
         pen.stamp()
+
         pen.shapesize(1.0, 1.0, None)
 
         self.render_health_meter(pen, x_offset, y_offset)
@@ -404,55 +430,7 @@ class Player(Sprite):
 
 class Missile(Sprite):
     def __init__(self, x, y, shape, color):
-        super().__init__(x, y, shape, color)
-        self.state = "ready"
-        self.thrust = 8.0
-        self.max_fuel = 200
-        self.fuel = self.max_fuel
-        self.height = 4
-        self.width = 4
-
-    def fire(self, x, y, heading, dx, dy):
-        if self.state == "ready":
-            self.state = "active"
-            self.x, self.y = x, y
-            self.heading = heading
-            self.dx = dx + math.cos(math.radians(heading)) * self.thrust
-            self.dy = dy + math.sin(math.radians(heading)) * self.thrust
-
-    def update(self):
-        if self.state == "active":
-            self.fuel -= abs(self.thrust)
-            if self.fuel <= 0:
-                self.reset()
-
-            self.heading += self.da
-            self.heading %= 360
-
-            self.x += self.dx
-            self.y += self.dy
-
-            self.border_check()
-
-    def reset(self):
-        self.fuel = self.max_fuel
-        self.dx = self.dy = 0
-        self.state = "ready"
-
-    def render(self, pen, x_offset, y_offset):
-        if self.state == "active":
-            pen.shapesize(0.2, 0.2, None)
-            pen.goto(self.x - x_offset, self.y - y_offset)
-            pen.setheading(self.heading)
-            pen.shape(self.shape)
-            pen.color(self.color)
-            pen.stamp()
-            pen.shapesize(1.0, 1.0, None)
-
-
-class EnemyMissile(Sprite):
-    def __init__(self, x, y, shape, color):
-        super().__init__(x, y, shape, color)
+        Sprite.__init__(self, x, y, shape, color)
         self.state = "ready"
         self.thrust = 8.0
         self.max_fuel = 200
@@ -474,7 +452,61 @@ class EnemyMissile(Sprite):
 
     def update(self):
         if self.state == "active":
-            self.fuel -= abs(self.thrust)
+            self.fuel -= self.thrust
+            if self.fuel <= 0:
+                self.reset()
+
+            self.heading += self.da
+            self.heading %= 360
+
+            self.x += self.dx
+            self.y += self.dy
+
+            self.border_check()
+
+    def reset(self):
+        self.fuel = self.max_fuel
+        self.dx = 0
+        self.dy = 0
+        self.state = "ready"
+
+    def render(self, pen, x_offset, y_offset):
+        if self.state == "active":
+            pen.shapesize(0.2, 0.2, None)
+            pen.goto(self.x - x_offset, self.y - y_offset)
+            pen.setheading(self.heading)
+            pen.shape(self.shape)
+            pen.color(self.color)
+            pen.stamp()
+
+            pen.shapesize(1.0, 1.0, None)
+
+
+class EnemyMissile(Sprite):
+    def __init__(self, x, y, shape, color):
+        Sprite.__init__(self, x, y, shape, color)
+        self.state = "ready"
+        self.thrust = 8.0
+        self.max_fuel = 200
+        self.fuel = self.max_fuel
+        self.height = 4
+        self.width = 4
+
+    def fire(self, x, y, heading, dx, dy):
+        if self.state == "ready":
+            self.state = "active"
+            self.x = x
+            self.y = y
+            self.heading = heading
+            self.dx = dx
+            self.dy = dy
+
+            self.dx += math.cos(math.radians(self.heading)) * self.thrust
+            self.dy += math.sin(math.radians(self.heading)) * self.thrust
+
+    def update(self):
+        if self.state == "active":
+            self.fuel -= self.thrust
             if self.fuel <= 0:
                 self.reset()
 
@@ -506,15 +538,10 @@ class EnemyMissile(Sprite):
 
 class Enemy(Sprite):
     def __init__(self, x, y, shape, color):
-        super().__init__(x, y, shape, color)
+        Sprite.__init__(self, x, y, shape, color)
         self.max_health = 20
         self.health = self.max_health
         self.type = random.choice(["hunter", "mine", "surveillance"])
-        # limits for speed
-        self.max_dx = 3.0
-        self.max_dy = 3.0
-        # small default thrust so they move
-        self.thrust = 0.02
 
         if self.type == "hunter":
             self.color = "red"
@@ -582,16 +609,15 @@ class Enemy(Sprite):
                 self.dy = -self.max_dy
 
     def reset(self):
-        # mark inactive so level end can detect
         self.state = "inactive"
 
 
 class Powerup(Sprite):
     def __init__(self, x, y, shape, color):
-        super().__init__(x, y, shape, color)
+        Sprite.__init__(self, x, y, shape, color)
 
 
-class Camera:
+class Camera():
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -601,7 +627,7 @@ class Camera:
         self.y = y
 
 
-class Radar:
+class Radar():
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -609,6 +635,7 @@ class Radar:
         self.height = height
 
     def render(self, pen, sprites):
+
         # Draw radar circle
         pen.color("white")
         pen.setheading(90)
@@ -688,26 +715,27 @@ while True:
         # Clear screen
         pen.clear()
 
+        # Do game stuff
         # Update sprites
-        for sprite in sprites[:]:
-            # update only active/inactive as appropriate
-            try:
-                sprite.update()
-            except Exception:
-                # keep loop robust if some update raises
-                pass
+        for sprite in sprites:
+            sprite.update()
 
         # Fire enemy missiles
         for enemy_missile in enemy_missiles:
             if enemy_missile.state == "ready":
-                # Find all active enemies
-                enemies = [s for s in sprites if isinstance(s, Enemy) and s.state == "active"]
-                if enemies:
-                    enemy = random.choice(enemies)
+                # Fire the missile
+                # Find all enemies
+                enemies = []
+                for sprite in sprites:
+                    if isinstance(sprite, Enemy):
+                        enemies.append(sprite)
 
-                    # Set heading to aim at player (convert atan2 to degrees)
-                    heading = math.degrees(math.atan2(player.y - enemy.y, player.x - enemy.x))
-                    enemy_missile.fire(enemy.x, enemy.y, heading, enemy.dx, enemy.dy)
+                enemy = random.choice(enemies)
+
+                # Set heading
+                heading = math.atan2(player.y - enemy.y, player.x - enemy.x)
+                heading = heading * (180 / 3.14159)
+                enemy_missile.fire(enemy.x, enemy.y, heading, enemy.dx, enemy.dy)
 
         # Check for collisions
         for sprite in sprites:
@@ -724,7 +752,6 @@ while True:
 
             if isinstance(sprite, Powerup):
                 if player.is_collision(sprite):
-                    # simple powerup effect: teleport out of way
                     sprite.x = 100
                     sprite.y = 100
 
@@ -752,7 +779,6 @@ while True:
             # Look for an active enemy
             if isinstance(sprite, Enemy) and sprite.state == "active":
                 end_of_level = False
-                break
         if end_of_level:
             game.level += 1
             game.start_level()
@@ -761,7 +787,7 @@ while True:
         camera.update(player.x, player.y)
 
         # Draw text
-        game.render_info(pen, player.score, sum(1 for s in sprites if isinstance(s, Enemy) and s.state == "active"))
+        game.render_info(pen, 0, 0)
 
         # Render the radar
         radar.render(pen, sprites)
